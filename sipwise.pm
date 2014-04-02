@@ -14,7 +14,12 @@ use FS::cdr qw( _cdr_date_parser_maker _cdr_min_parser_maker );
 
   #listref of what to do with each field from the CDR, in order
   'import_fields' => [    
-    trim('uniqueid'),                    # 1 id
+    sub {
+      my($cdr, $data, $conf, $hashref) = @_;
+      $data =~ s/'//g;
+      $hashref->{skiprow} = 1 if (length($data) == 32); # handle last row
+      $cdr->uniqueid($data);    # 1 id
+    },
     skip(1),                    # 2 update_time
     skip(1),                    # 3 source_user_id
     skip(1),                    # 4 source_provider_id
